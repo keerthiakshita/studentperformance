@@ -1,0 +1,47 @@
+
+
+SELECT *
+FROM StudentsPerformance
+WHERE gender = 'female'; 
+
+
+SELECT 
+    [race_ethnicity], 
+    AVG([math_score]) AS AvgMathScore,
+    AVG([reading_score]) AS AvgReadingScore,
+    AVG([writing_score]) AS AvgWritingScore
+FROM StudentsPerformance
+GROUP BY [race_ethnicity];
+
+SELECT 
+    [parental_level_of_education], 
+    COUNT(*) AS StudentCount
+FROM StudentsPerformance
+GROUP BY [parental_level_of_education];
+
+SELECT 
+    [lunch], 
+    AVG([math_score]) AS AvgMathScore,
+    AVG([reading_score]) AS AvgReadingScore,
+    AVG([writing_score]) AS AvgWritingScore
+FROM StudentsPerformance
+GROUP BY [lunch];
+
+
+WITH StudentScores AS (
+    SELECT *,
+           CAST((CAST([math_score] AS FLOAT) + CAST([reading_score] AS FLOAT) + CAST([writing_score] AS FLOAT)) / 3.0 AS FLOAT) AS AvgScore
+    FROM StudentsPerformance
+)
+, RankedStudents AS (
+    SELECT *,
+           ROW_NUMBER() OVER (ORDER BY AvgScore DESC) AS Rank,
+           COUNT(*) OVER () AS TotalStudents
+    FROM StudentScores
+)
+SELECT *
+FROM RankedStudents
+WHERE Rank <= TotalStudents * 0.10;
+
+
+
